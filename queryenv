@@ -1,0 +1,6 @@
+WORKING_DIR=`pwd`
+CLASSPATH="$WORKING_DIR:$WORKING_DIR/classes:$WORKING_DIR/lib:."
+
+export CLASSPATH
+
+echo "Query environment setup successfully"
