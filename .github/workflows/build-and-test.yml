@@ -1,0 +1,36 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-and-test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 9
+
+    - name: build
+      run: |
+        source queryenv
+        mkdir -p classes
+        ./build.sh
+
+    - name: generate random DB
+      run: scripts/make_random_db.sh
+
+    # ignore not implemented methods for now...
+    - name: execute queries
+      run: yes 1 | scripts/exec_testcases.sh || true
+
+    - name: compare output with postgres
+      run: scripts/diff_psql.sh
