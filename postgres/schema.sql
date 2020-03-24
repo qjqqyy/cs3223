@@ -1,0 +1,28 @@
+CREATE TABLE CUSTOMER (
+    cid INTEGER PRIMARY KEY,
+    gender INTEGER,
+    firstname CHAR(10),
+    lastname CHAR(10),
+    address CHAR(26)
+);
+
+CREATE TABLE CART (
+    cartid INTEGER PRIMARY KEY,
+    cid INTEGER REFERENCES CUSTOMER,
+    status CHAR(8),
+    remarks CHAR(38)
+);
+
+CREATE TABLE CARTDETAILS (
+    iid INTEGER PRIMARY KEY,
+    cartid INTEGER REFERENCES CART,
+    qty INTEGER,
+    remarks CHAR(44)
+);
+
+CREATE TABLE BILL (
+    billid INTEGER PRIMARY KEY,
+    iid INTEGER REFERENCES CARTDETAILS,
+    amount INTEGER,
+    remarks CHAR(44)
+);
