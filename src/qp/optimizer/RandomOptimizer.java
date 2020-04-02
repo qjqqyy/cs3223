@@ -49,6 +49,12 @@ public class RandomOptimizer {
             int joinType = ((Join) node).getJoinType();
             int numbuff = BufferManager.getBuffersPerJoin();
             switch (joinType) {
+                case JoinType.BLOCKNESTED:
+                    BlockNestedJoin bnj = new BlockNestedJoin((Join) node);
+                    bnj.setLeft(left);
+                    bnj.setRight(right);
+                    bnj.setNumBuff(numbuff);
+                    return bnj;
                 case JoinType.NESTEDJOIN:
                     NestedJoin nj = new NestedJoin((Join) node);
                     nj.setLeft(left);

@@ -14,6 +14,7 @@ import qp.utils.Schema;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.Math;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
@@ -142,6 +143,10 @@ public class PlanCost {
         switch (joinType) {
             case JoinType.NESTEDJOIN:
                 joincost = leftpages * rightpages;
+                break;
+            case JoinType.BLOCKNESTED:
+                long numOuterBlocks = (long) Math.ceil(leftpages / (float) (Batch.getPageSize() / tuplesize));
+                joincost = leftpages + numOuterBlocks * rightpages;
                 break;
             default:
                 System.out.println("join type is not supported");
