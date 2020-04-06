@@ -1,0 +1,3 @@
+SELECT CUSTOMER.cid,CUSTOMER.gender,CUSTOMER.firstname,CUSTOMER.lastname,CUSTOMER.address,CART.cartid,CART.cid,CART.status,CART.remarks
+FROM CUSTOMER,CART
+WHERE CUSTOMER.cid=CART.cid

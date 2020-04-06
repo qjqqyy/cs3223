@@ -151,7 +151,7 @@ public class BlockNestedJoin extends Join {
 
            while(!eosInner) {
                try {
-                   if (inCursor == 0 && outCursor == 0) {
+                   if (inCursor == 0 && outCursor == 0 && bufferCursor == 0) {
                        innerBuffer = (Batch) in.readObject();
                    }
 
