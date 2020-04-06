@@ -77,6 +77,8 @@ public class PlanCost {
             return getStatistics((Project) node);
         } else if (node.getOpType() == OpType.SCAN) {
             return getStatistics((Scan) node);
+        } else if (node.getOpType() == OpType.DISTINCT) {
+            return getStatistics((Distinct) node);
         }
         System.out.println("operator is not supported");
         isFeasible = false;
@@ -90,6 +92,21 @@ public class PlanCost {
     protected long getStatistics(Project node) {
         return calculateCost(node.getBase());
     }
+
+    /**
+     * Distinct cost requires the cost to sort the result
+     * *
+     **/
+    protected long getStatistics(Distinct node) {
+        long numOfTuples = calculateCost(node.getBase());
+        int numBuff = BufferManager.getTotalBuffers();
+        long tupleSize = node.getSchema().getTupleSize();
+        long numOfPages = (long) Math.ceil((double)numOfTuples/tupleSize);
+        long sortCost = 2*numOfPages*(1 + (long) Math.ceil( Math.log( Math.ceil(numOfPages/numBuff) / Math.log(numBuff-1) ) ));
+        cost += sortCost;
+        return calculateCost(node.getBase());
+    }
+
 
     /**
      * Calculates the statistics and cost of join operation
