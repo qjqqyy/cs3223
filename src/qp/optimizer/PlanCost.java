@@ -165,6 +165,12 @@ public class PlanCost {
                 long numOuterBlocks = (long) Math.ceil(leftpages / (float) (Batch.getPageSize() / tuplesize));
                 joincost = leftpages + numOuterBlocks * rightpages;
                 break;
+            case JoinType.SORTMERGE:
+                long sortLeftCost = 2*leftpages*(1 + (long) Math.ceil( Math.log( Math.ceil(leftpages/numbuff) / Math.log(numbuff-1) ) ));
+                long sortRightCost = 2*rightpages*(1 + (long) Math.ceil( Math.log( Math.ceil(rightpages/numbuff) / Math.log(numbuff-1) ) ));
+                long mergeCost = leftpages + rightpages;
+                joincost = sortLeftCost + sortRightCost + mergeCost;
+                break;
             default:
                 System.out.println("join type is not supported");
                 return 0;
