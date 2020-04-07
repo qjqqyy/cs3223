@@ -8,7 +8,9 @@ cd $(dirname $0)/..
 source queryenv
 cd $WORK_DIR
 
+FAILED=0
 for i in query*.sql; do
   echo "===> RUNNING $i <==="
-  java QueryMain $i ${i//.sql/}.txt $PAGE_SIZE $NUM_BUFFER
+  java QueryMain $i ${i//.sql/}.txt $PAGE_SIZE $NUM_BUFFER || FAILED=1
 done
+exit $FAILED

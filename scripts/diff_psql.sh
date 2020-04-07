@@ -15,7 +15,7 @@ for i in query*.txt; do
   echo "===> CHECKING $i <==="
   sed -e "/WHERE/s/,/ AND /g;s/\"/'/g" ${i//.txt/.sql} | \
     docker exec -i cs3223 psql -U postgres -f - --csv -A -F "	" -t -o "/cs3223/work/expected_$i"
-  diff -u <(sort expected_$i) <(sed -e '1d;s/\t$//' $i | sort) || FAILED=1
+  diff -u <(sed -e 's/\.[0-9]*/.truncated/' expected_$i | sort) <(sed -e '1d;s/\t$//;s/\.[0-9]*/.truncated/' $i | sort) || FAILED=1
 done
 
 docker stop cs3223

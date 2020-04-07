@@ -28,9 +28,8 @@ jobs:
     - name: generate random DB
       run: scripts/make_random_db.sh
 
-    # ignore not implemented methods for now...
     - name: execute queries
-      run: yes 1 | scripts/exec_testcases.sh || true
+      run: yes 1 | scripts/exec_testcases.sh
 
     - name: compare output with postgres
       run: scripts/diff_psql.sh

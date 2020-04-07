@@ -208,6 +208,7 @@ public class BlockNestedJoin extends Join {
                    System.exit(1);
                }
            }
+
         }
         return outputBuffer;
     }
@@ -221,4 +222,6 @@ public class BlockNestedJoin extends Join {
         return true;
     }
 
+
 }
+

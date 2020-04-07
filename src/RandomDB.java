@@ -119,7 +119,7 @@ public class RandomDB {
                     if (datatype[j].equals("STRING")) {
                         String temp = rdb.randString(range[j]);
                         outtbl.print(temp + "\t");
-                    } else if (datatype[j].equals("FLOAT")) {
+                    } else if (datatype[j].equals("REAL")) {
                         float value = range[j] * random.nextFloat();
                         outtbl.print(value + "\t");
                     } else if (datatype[j].equals("INTEGER")) {
@@ -150,7 +150,7 @@ public class RandomDB {
             for (i = 0; i < numCol; ++i) {
                 if (datatype[i].equals("STRING")) {
                     outstat.print(numtuple + "\t");
-                } else if (datatype[i].equals("FLOAT")) {
+                } else if (datatype[i].equals("REAL")) {
                     outstat.print(numtuple + "\t");
                 } else if (datatype[i].equals("INTEGER")) {
                     if (keytype[i].equals("PK")) {
