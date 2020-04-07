@@ -12,6 +12,7 @@ import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.Objects;
 
 /**
  * Scan operator - read data from a file
@@ -106,4 +107,16 @@ public class Scan extends Operator {
         return newscan;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Scan)) return false;
+        Scan scan = (Scan) o;
+        return tabname.equals(scan.tabname);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tabname);
+    }
 }

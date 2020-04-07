@@ -6,7 +6,7 @@ package qp.operators;
 import qp.utils.Batch;
 import qp.utils.Schema;
 
-public class Operator {
+public abstract class Operator {
 
     int optype;     // Whether it is OpType.SELECT/ Optype.PROJECT/OpType.JOIN
     Schema schema;  // Schema of the result at this operator
@@ -47,10 +47,10 @@ public class Operator {
         return true;
     }
 
-    public Object clone() {
-        return new Operator(optype);
-    }
+    public abstract Object clone();
 
+    public abstract boolean equals(Object o);
+    public abstract int hashCode();
 }
 
 

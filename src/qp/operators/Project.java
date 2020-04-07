@@ -8,7 +8,7 @@ import qp.utils.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
+import java.util.Objects;
 
 public class Project extends Operator {
 
@@ -173,4 +173,17 @@ public class Project extends Operator {
         return newproj;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Project)) return false;
+        Project project = (Project) o;
+        return base.equals(project.base) &&
+                attrList.equals(project.attrList);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(base, attrList);
+    }
 }

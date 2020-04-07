@@ -5,6 +5,7 @@
 import qp.operators.Debug;
 import qp.operators.Operator;
 import qp.optimizer.BufferManager;
+import qp.optimizer.CuckooTabuOptimizer;
 import qp.optimizer.PlanCost;
 import qp.optimizer.RandomOptimizer;
 import qp.parser.Scaner;
@@ -123,7 +124,7 @@ public class QueryMain {
     public static Operator getQueryPlan(SQLQuery sqlquery) {
         Operator root = null;
 
-        RandomOptimizer optimizer = new RandomOptimizer(sqlquery);
+        RandomOptimizer optimizer = new CuckooTabuOptimizer(sqlquery);
         Operator planroot = optimizer.getOptimizedPlan();
 
         if (planroot == null) {

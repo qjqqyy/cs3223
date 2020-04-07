@@ -8,6 +8,7 @@ import qp.utils.Condition;
 import qp.utils.Schema;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Join extends Operator {
 
@@ -118,4 +119,19 @@ public class Join extends Operator {
         return jn;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Join)) return false;
+        Join join = (Join) o;
+        return jointype == join.jointype &&
+                left.equals(join.left) &&
+                right.equals(join.right) &&
+                conditionList.equals(join.conditionList);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(left, right, jointype);
+    }
 }

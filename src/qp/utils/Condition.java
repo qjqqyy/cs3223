@@ -4,6 +4,8 @@
 
 package qp.utils;
 
+import java.util.Objects;
+
 public class Condition {
 
     public static final int LESSTHAN = 1;
@@ -99,5 +101,21 @@ public class Condition {
         Condition newcn = new Condition(newlhs, exprtype, newrhs);
         newcn.setOpType(optype);
         return newcn;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Condition)) return false;
+        Condition condition = (Condition) o;
+        return optype == condition.optype &&
+                exprtype == condition.exprtype &&
+                lhs.equals(condition.lhs) &&
+                rhs.equals(condition.rhs);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(lhs, optype, exprtype, rhs);
     }
 }

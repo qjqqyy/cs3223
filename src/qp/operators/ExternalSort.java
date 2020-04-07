@@ -494,6 +494,28 @@ public class ExternalSort extends Operator {
         }
         return true;
     }
+
+    @Override
+    public Object clone() {
+        // HACK
+        System.err.println("not implemented: ExternalSort::clone");
+        System.exit(1);
+        return null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ExternalSort)) return false;
+        ExternalSort that = (ExternalSort) o;
+        return base.equals(that.base) &&
+                indexes.equals(that.indexes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(base, indexes);
+    }
 }
 
 

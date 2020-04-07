@@ -9,7 +9,7 @@ import java.lang.Math;
 
 public class RandNumb {
 
-    /** Get a random number between a and b **/
+    /** Get a random number between a and b, both inclusive **/
     public static int randInt(int a, int b) {
         return ((int) (Math.floor(Math.random() * (b - a + 1)) + a));
     }

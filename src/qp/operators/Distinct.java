@@ -7,6 +7,7 @@ package qp.operators;
 import qp.utils.*;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Distinct extends ExternalSort {
 
@@ -137,4 +138,18 @@ public class Distinct extends ExternalSort {
         return newDistinct;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Distinct)) return false;
+        if (!super.equals(o)) return false;
+        Distinct distinct = (Distinct) o;
+        return base.equals(distinct.base) &&
+                attrList.equals(distinct.attrList);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), base, attrList);
+    }
 }

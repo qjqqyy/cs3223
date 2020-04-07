@@ -388,7 +388,7 @@ public class RandomOptimizer {
     /**
      * Modifies the schema of operators which are modified due to selecing an alternative neighbor plan
      **/
-    private void modifySchema(Operator node) {
+    protected void modifySchema(Operator node) {
         if (node.getOpType() == OpType.JOIN) {
             Operator left = ((Join) node).getLeft();
             Operator right = ((Join) node).getRight();

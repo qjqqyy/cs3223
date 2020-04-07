@@ -6,6 +6,8 @@ package qp.operators;
 
 import qp.utils.*;
 
+import java.util.Objects;
+
 public class Select extends Operator {
 
     Operator base;  // Base operator
@@ -227,4 +229,17 @@ public class Select extends Operator {
         return newsel;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Select)) return false;
+        Select select = (Select) o;
+        return base.equals(select.base) &&
+                con.equals(select.con);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(base, con);
+    }
 }
