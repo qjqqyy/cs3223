@@ -228,11 +228,9 @@ public class ExternalSort extends Operator {
         Batch outputPage = new Batch(batchSize);
         Batch currPage;
         int pointerInCurrPage;
-        int numOfRunsDoneMerging = 0;
         int numOfRunsToMerge = runsToMerge.size();
 //        System.out.println("RUNS TO MERGE SIZE "+numOfRunsToMerge);
 
-        ArrayList<Boolean> finishEachRun = new ArrayList<>(numOfRunsToMerge);
         ArrayList<Integer> pointersInEachPage = new ArrayList<>(numOfRunsToMerge);
         ArrayList<ObjectInputStream> inputStreamsOfRuns = new ArrayList<>(numOfRunsToMerge);
         ArrayList<Batch> pagesOfEachRun = new ArrayList<>(numOfRunsToMerge);
@@ -241,83 +239,93 @@ public class ExternalSort extends Operator {
         ObjectOutputStream out = initialiseOutputStream(outputRun);
         allFiles.add(outputRun);
 
-        // for each run, set up the input stream and the first page,
-        // as well as the tuple pointers and boolean indicator of whether the run has been fully read
+        // for each run, set up the input stream and the first page, and the tuple pointers
         for (int i = 0; i < numOfRunsToMerge; i++) {
             ObjectInputStream inForCurrRun = initialiseInputStream(runsToMerge.get(i));
-//            System.out.println("read page from inForCurrRun");
             Batch pageForCurrRun = readPage(inForCurrRun);
             pagesOfEachRun.add(pageForCurrRun);
             inputStreamsOfRuns.add(inForCurrRun);
             pointersInEachPage.add(0);
-            finishEachRun.add(false);
         }
 
-        //perform the k way merge sort
-        while (numOfRunsDoneMerging < numOfRunsToMerge) {
-            int smallestPageIndex = 0;
-            Tuple smallestTuple = null;
-//            System.out.println("2 POINTERS PAGE SIZE "+ pointersInEachPage.size());
+        // data structures for the k way merge sort
+        PriorityQueue<Tuple> smallestTuples = new PriorityQueue<>(numOfRunsToMerge,(t1, t2) -> Tuple.compareTuples(t1, t2, indexes) );
+        HashMap<Tuple, Integer> tupleRunIndex =  new HashMap<>();
 
-            //compare smallestTuple with the other tuples from each run
-            for (int i = 0; i < numOfRunsToMerge ; i++) {
-                //check if already finish reading this run
-                if(finishEachRun.get(i)) {
+        // fill up the pq with first tuples of each run
+        for (int i = 0; i < numOfRunsToMerge ; i++) {
+            currPage = pagesOfEachRun.get(i);
+            pointerInCurrPage = pointersInEachPage.get(i);
+
+            //already finish reading the batch for this run so load in new batch
+            if (currPage == null || pointerInCurrPage == currPage.size()) {
+//                    System.out.println("pointer at the end of batch so load in new batch");
+                ObjectInputStream inForCurrRun = inputStreamsOfRuns.get(i);
+                currPage = readPage(inForCurrRun);
+                inputStreamsOfRuns.set(i, inForCurrRun);
+                pagesOfEachRun.set(i, currPage);
+
+                if (currPage == null || currPage.isEmpty()) {
+                    closeInputStream(inForCurrRun);
+//                      System.out.println("num of runs done merging "+ numOfRunsDoneMerging);
                     continue;
                 }
 
-                currPage = pagesOfEachRun.get(i);
-                pointerInCurrPage = pointersInEachPage.get(i);
+                pointerInCurrPage = 0;
+                pointersInEachPage.set(i, pointerInCurrPage);
+            }
 
-                //already finish reading the batch for this run so load in new batch
-                if ( currPage == null || pointerInCurrPage == currPage.size()) {
+            Tuple tuple = currPage.get(pointerInCurrPage);
+            smallestTuples.add(tuple);
+            tupleRunIndex.put(tuple,i);
+//            System.out.println("ADD Tuple to pq");
+//            Debug.PPrint(tuple);
+
+            //increment the pointer in the page of the run that was selected
+            pointerInCurrPage++;
+            pointersInEachPage.set(i, pointerInCurrPage);
+
+        }
+
+        // keep adding the smallest tuple to output batch till we have added all tuples
+        while (!smallestTuples.isEmpty()) {
+            Tuple smallestTuple = smallestTuples.poll();
+            Integer smallestPageIndex = tupleRunIndex.remove(smallestTuple);
+            outputPage.add(smallestTuple);
+//            System.out.println("Poll Tuple from pq");
+//            Debug.PPrint(smallestTuple);
+
+            //get the next tuple from the same run to be added to the priority queue
+            currPage = pagesOfEachRun.get(smallestPageIndex);
+            pointerInCurrPage = pointersInEachPage.get(smallestPageIndex);
+
+            //already finish reading the batch for this run so load in new batch
+            if (currPage == null || pointerInCurrPage == currPage.size()) {
 //                    System.out.println("pointer at the end of batch so load in new batch");
-                    ObjectInputStream inForCurrRun = inputStreamsOfRuns.get(i);
-                    currPage = readPage(inForCurrRun);
-                    inputStreamsOfRuns.set(i,inForCurrRun);
-                    pagesOfEachRun.set(i, currPage);
+                ObjectInputStream inForCurrRun = inputStreamsOfRuns.get(smallestPageIndex);
+                currPage = readPage(inForCurrRun);
+                inputStreamsOfRuns.set(smallestPageIndex, inForCurrRun);
+                pagesOfEachRun.set(smallestPageIndex, currPage);
 
-                    if (currPage == null || currPage.isEmpty()) {
-                        closeInputStream(inForCurrRun);
-                        finishEachRun.set(i,Boolean.TRUE);
-                        numOfRunsDoneMerging++;
+                if (currPage == null || currPage.isEmpty()) {
+                    closeInputStream(inForCurrRun);
 //                        System.out.println("num of runs done merging "+ numOfRunsDoneMerging);
-                        continue;
-                    }
-
-                    pointerInCurrPage = 0;
-                    pointersInEachPage.set(i, pointerInCurrPage);
-//                    System.out.println("3 POINTERS PAGE SIZE "+ pointersInEachPage.size());
+                    continue;
                 }
 
-                Tuple tuple = currPage.get(pointerInCurrPage);
-//                if (smallestTuple!= null) {
-//                    System.out.println("smallest tuple");
-//                    Debug.PPrint(smallestTuple);
-//                }
-//                if (tuple!= null) {
-//                    System.out.println(" tuple");
-//                    Debug.PPrint(tuple);
-//                }
-                if (smallestTuple == null || Tuple.compareTuples(tuple, smallestTuple, indexes) < 0) {
-                    smallestTuple = tuple;
-                    smallestPageIndex = i;
-                }
-
-            }
-
-            if (smallestTuple != null) {
-//                System.out.println("smallest Tuple");
-//                System.out.println(smallestPageIndex);
-//                Debug.PPrint(smallestTuple);
-                outputPage.add(smallestTuple);
-
-                //increment the pointer in the page that was selected
-                pointerInCurrPage = pointersInEachPage.get(smallestPageIndex);
-                pointerInCurrPage++;
+                pointerInCurrPage = 0;
                 pointersInEachPage.set(smallestPageIndex, pointerInCurrPage);
-//                System.out.println("4 POINTERS PAGE SIZE "+ pointersInEachPage.size());
             }
+
+            Tuple nextTuple = currPage.get(pointerInCurrPage);
+            smallestTuples.add(nextTuple);
+            tupleRunIndex.put(nextTuple,smallestPageIndex);
+//            System.out.println("ADD Tuple to pq");
+//            Debug.PPrint(nextTuple);
+
+            //increment the pointer in the page of the run that was selected
+            pointerInCurrPage++;
+            pointersInEachPage.set(smallestPageIndex, pointerInCurrPage);
 
             //write out the page if full
             if (outputPage.isFull()) {
@@ -327,6 +335,7 @@ public class ExternalSort extends Operator {
 //                System.out.println();
                 outputPage = new Batch(batchSize);
             }
+
         }
 
         //leftover tuples in output page even if its not full
@@ -334,6 +343,7 @@ public class ExternalSort extends Operator {
             writePage(out, outputPage);
         }
 
+        tupleRunIndex.clear();
         closeOutputStream(out);
         for(ObjectInputStream i : inputStreamsOfRuns) {
             closeInputStream(i);
