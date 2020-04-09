@@ -1,3 +1,8 @@
+/**
+ * Class to facilitate computation of aggregates during Projection.
+ **/
+
+
 package qp.utils;
 
 import java.util.HashMap;

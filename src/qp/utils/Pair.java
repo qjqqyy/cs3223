@@ -1,3 +1,8 @@
+/**
+ * Pair class to facilitate processing of aggregates during Projection
+ **/
+
+
 package qp.utils;
 
 public class Pair {

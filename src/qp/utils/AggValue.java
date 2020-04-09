@@ -1,6 +1,9 @@
+/**
+ * Interface: Union type of int and float, used for aggregations.
+ * */
+
 package qp.utils;
 
-/** Union type of int and float, used for aggregations. */
 interface AggValue {
     static AggValue of(Object x) {
         if (x instanceof Integer)

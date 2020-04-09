@@ -1,3 +1,7 @@
+/**
+ * Class to facilitate computation of float aggregate values during Projection.
+ **/
+
 package qp.utils;
 
 public class AggFloat implements AggValue {

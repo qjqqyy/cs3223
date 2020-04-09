@@ -1,5 +1,5 @@
 /**
- * Algorithm for Block Nested Join. A Block can contain multiple Pages
+ * Algorithm for Block Nested Join.
  */
 
 package qp.operators;
@@ -22,9 +22,9 @@ public class BlockNestedJoin extends Join {
     int batchSize;                   // Number of tuples per output batch
     String innerFileName;            // The file name where the inner table is materialized
     ObjectInputStream in;            // File pointer to the right hand materialized file
-    ArrayList<Integer> outerIndex;    // Indices of the join attributes in left (outer) table
+    ArrayList<Integer> outerIndex;   // Indices of the join attributes in left (outer) table
     ArrayList<Integer> innerIndex;   // Indices of the join attributes in right (inner) table
-    static int fileNumber = 0;         // To get unique filenum for this operation
+    static int fileNumber = 0;       // To get unique filenum for this operation
 
 
     int outCursor;                   // Cursor for outer buffer
@@ -38,7 +38,6 @@ public class BlockNestedJoin extends Join {
         schema = join.getSchema();
         jointype = join.getJoinType();
         numBuff = join.getNumBuff();
-
     }
 
 
@@ -109,8 +108,8 @@ public class BlockNestedJoin extends Join {
 
 
     /**
-     * Selects tuples satisfying join condition from N-2 input buffers and
-     * returns a page of output tuples.
+     * Compares tuples from the outer (left) table and the inner (right) table and outputs a page of tuples that
+     * satisfy the join condition.
      **/
     public Batch next() {
         if (eosOuter) {
@@ -118,11 +117,13 @@ public class BlockNestedJoin extends Join {
         }
         outputBuffer = new Batch(batchSize);
         while (!outputBuffer.isFull()) {
-            //new outer block needs to be fetched to fill outer buffers
+
+            /** new outer block needs to be fetched to fill outer buffers **/
             if (outCursor == 0 && eosInner) {
                 outerBuffer = new ArrayList<>();
                 for (int i = 0; i < numBuff - 2; i++) {
-                    //outer buffer may not be completely full
+
+                    /**outer buffer may not be completely full **/
                     Batch tuples = (Batch) left.next();
 
                     if (tuples != null) {
@@ -131,7 +132,7 @@ public class BlockNestedJoin extends Join {
                         break;
                     }
                 }
-                // if outer buffer doesnt have any new entries
+                /** if outer buffer doesnt have any new entries **/
                 if (outerBuffer.isEmpty()) {
                     eosOuter = true;
                     return outputBuffer;
@@ -149,21 +150,33 @@ public class BlockNestedJoin extends Join {
                 }
             }
 
+           /** while haven't reach end of stream of inner table **/
            while(!eosInner) {
                try {
+                   /** fetch new inner page only if all cursors are at 0. Otherwise it implies that not all outer
+                    ** pages have been scanned against inner pages and so dont fetch a new inner page yet.
+                    **/
                    if (inCursor == 0 && outCursor == 0 && bufferCursor == 0) {
                        innerBuffer = (Batch) in.readObject();
                    }
 
+                   /** Loops through the outermost Arraylist of buffers and for each tuple in each outer page
+                    ** the tuples in the inner page are checked against the join condition.
+                    **/
                    for (int i = bufferCursor; i < outerBuffer.size(); i++) {
                        for (int j = outCursor; j < outerBuffer.get(i).size(); j++) {
                            for (int k = inCursor; k < innerBuffer.size(); k++) {
                                Tuple outerTuple = outerBuffer.get(i).get(j);
                                Tuple innerTuple = innerBuffer.get(k);
+
+                               /** if join check passes, add to output tuple **/
                                if (outerTuple.checkJoin(innerTuple, outerIndex, innerIndex)) {
-                                   //System.out.println("here");
                                    Tuple outputTuple = outerTuple.joinWith(innerTuple);
                                    outputBuffer.add(outputTuple);
+
+                                   /** manipulation of cursors if output buffer is full but haven't scanned everything,
+                                    ** so that there is no duplication or missing tuples from final result
+                                    **/
                                    if (outputBuffer.isFull()) {
                                        if (j == outerBuffer.get(i).size() - 1 && k == innerBuffer.size() - 1) {  //case 1
                                            bufferCursor = i + 1;

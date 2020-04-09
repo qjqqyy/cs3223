@@ -1,3 +1,8 @@
+/**
+ * Class to facilitate computation of integer aggregate values during Projection.
+ **/
+
+
 package qp.utils;
 
 public class AggInt implements AggValue {
