@@ -102,7 +102,7 @@ public class PlanCost {
         int numBuff = BufferManager.getTotalBuffers();
         long tupleSize = node.getSchema().getTupleSize();
         long numOfPages = (long) Math.ceil((double)numOfTuples/tupleSize);
-        long sortCost = 2*numOfPages*(1 + (long) Math.ceil( Math.log( Math.ceil(numOfPages/numBuff) / Math.log(numBuff-1) ) ));
+        long sortCost = 2*numOfPages*(1 + (long) Math.ceil( Math.log( Math.ceil(numOfPages/(double)numBuff)  )/ Math.log(numBuff-1) ) );
         cost += sortCost;
         return calculateCost(node.getBase());
     }
@@ -159,15 +159,15 @@ public class PlanCost {
 
         switch (joinType) {
             case JoinType.NESTEDJOIN:
-                joincost = leftpages * rightpages;
+                joincost = leftpages + leftpages * rightpages;
                 break;
             case JoinType.BLOCKNESTED:
-                long numOuterBlocks = (long) Math.ceil(leftpages / (float) (Batch.getPageSize() / tuplesize));
+                long numOuterBlocks = (long) Math.ceil(leftpages / (double) (numbuff - 2));
                 joincost = leftpages + numOuterBlocks * rightpages;
                 break;
             case JoinType.SORTMERGE:
-                long sortLeftCost = 2*leftpages*(1 + (long) Math.ceil( Math.log( Math.ceil(leftpages/numbuff) / Math.log(numbuff-1) ) ));
-                long sortRightCost = 2*rightpages*(1 + (long) Math.ceil( Math.log( Math.ceil(rightpages/numbuff) / Math.log(numbuff-1) ) ));
+                long sortLeftCost = 2*leftpages*(1 + (long) Math.ceil( Math.log(Math.ceil(leftpages/(double)numbuff)) / Math.log(numbuff-1) ) );
+                long sortRightCost = 2*rightpages*(1 + (long) Math.ceil( Math.log(Math.ceil(rightpages/(double)numbuff)) / Math.log(numbuff-1) ) );
                 long mergeCost = leftpages + rightpages;
                 joincost = sortLeftCost + sortRightCost + mergeCost;
                 break;

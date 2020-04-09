@@ -1,4 +1,15 @@
+# pandoc -> latex -> pdf intermediate stuff
+report/*.bbl
+report/*.run.xml
+report/*.xdv
+report/*.tex
+
+
+# created by ci script
 /work
+
+# intermediate stuff
+*.tbl
 
 # Created by https://www.gitignore.io/api/vim,java,macos,intellij
 # Edit at https://www.gitignore.io/?templates=vim,java,macos,intellij
